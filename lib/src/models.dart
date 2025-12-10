@@ -47,3 +47,22 @@ class BiometricAuthResult {
   final bool success;
   final BiometricKind? biometricKind;
 }
+
+class BiometricCapabilities {
+  final BiometricSupportStatus status;
+  final Set<BiometricKind> availableKinds;
+
+  const BiometricCapabilities({
+    required this.status,
+    required this.availableKinds,
+  });
+
+  bool get hasFace => availableKinds.contains(BiometricKind.face);
+  bool get hasFingerprint => availableKinds.contains(BiometricKind.fingerprint);
+
+  String preferredLabel() {
+    if (hasFace) return 'Face ID';
+    if (hasFingerprint) return 'fingerprint';
+    return 'biometrics';
+  }
+}

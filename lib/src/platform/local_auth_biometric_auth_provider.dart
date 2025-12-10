@@ -14,63 +14,133 @@ class LocalAuthBiometricAuthProvider extends BiometricAuthProvider {
   @override
   Future<BiometricSupportStatus> checkSupport() async {
     try {
-      final supported = await _localAuth.isDeviceSupported();
-      if (!supported) {
+      // 1) Is device capable of *any* biometrics?
+      final bool isSupported = await _localAuth.isDeviceSupported();
+      if (!isSupported) {
         return BiometricSupportStatus.noHardware;
       }
 
-      final canCheck = await _localAuth.canCheckBiometrics;
+      // 2) Are biometrics enrolled?
+      final bool canCheck = await _localAuth.canCheckBiometrics;
       if (!canCheck) {
         return BiometricSupportStatus.notEnrolled;
       }
 
       return BiometricSupportStatus.supported;
     } on PlatformException {
-      // Optionally inspect e.code for finer mapping
       return BiometricSupportStatus.unknown;
     }
   }
 
   @override
-  Future<BiometricAuthResult> authenticate(
-    BiometricPromptConfig config,
-  ) async {
+  Future<BiometricCapabilities> getCapabilities() async {
     try {
-      final available = await _localAuth.getAvailableBiometrics();
+      final status = await checkSupport();
 
-      // Filter by requested kind
-      final bool hasWantedType = switch (config.biometricKind) {
+      if (status != BiometricSupportStatus.supported) {
+        return BiometricCapabilities(
+          status: status,
+          availableKinds: const <BiometricKind>{},
+        );
+      }
+
+      final List<BiometricType> available =
+          await _localAuth.getAvailableBiometrics();
+
+      final kinds = <BiometricKind>{};
+
+      if (available.contains(BiometricType.face)) {
+        kinds.add(BiometricKind.face);
+      }
+
+      if (available.contains(BiometricType.fingerprint) ||
+          available.contains(BiometricType.strong) ||
+          available.contains(BiometricType.weak)) {
+        kinds.add(BiometricKind.fingerprint);
+      }
+
+      return BiometricCapabilities(
+        status: status,
+        availableKinds: kinds,
+      );
+    } on PlatformException {
+      return const BiometricCapabilities(
+        status: BiometricSupportStatus.unknown,
+        availableKinds: <BiometricKind>{},
+      );
+    }
+  }
+
+  @override
+  Future<BiometricAuthResult> authenticate({
+    required String reason,
+    BiometricKind kind = BiometricKind.any,
+    bool useErrorDialogs = true,
+    bool stickyAuth = false,
+  }) async {
+    try {
+      final List<BiometricType> available =
+          await _localAuth.getAvailableBiometrics();
+
+      // Check if requested kind exists
+      // Check if requested kind exists
+      final bool hasWantedType = switch (kind) {
         BiometricKind.any => available.isNotEmpty,
         BiometricKind.face => available.contains(BiometricType.face),
         BiometricKind.fingerprint =>
           available.contains(BiometricType.fingerprint) ||
               available.contains(BiometricType.strong) ||
               available.contains(BiometricType.weak),
+        BiometricKind.strong => available.contains(BiometricType.strong),
+        BiometricKind.weak => available.contains(BiometricType.weak),
       };
 
       if (!hasWantedType) {
         throw BiometricException(
-          'Requested biometric kind (${config.biometricKind}) not available',
+          'Requested biometric kind ($kind) not available',
         );
       }
 
+      // For BiometricKind.any, report what we actually used.
+      final BiometricKind effectiveKind = switch (kind) {
+        BiometricKind.any => () {
+            if (available.contains(BiometricType.face)) {
+              return BiometricKind.face;
+            }
+            if (available.contains(BiometricType.strong)) {
+              return BiometricKind.strong;
+            }
+            if (available.contains(BiometricType.weak)) {
+              return BiometricKind.weak;
+            }
+            return BiometricKind.fingerprint;
+          }(),
+        _ => kind,
+      };
+
       final bool success = await _localAuth.authenticate(
-        localizedReason: config.reason,
+        localizedReason: reason,
         options: AuthenticationOptions(
           biometricOnly: true,
-          useErrorDialogs: config.useErrorDialogs,
-          stickyAuth: config.stickyAuth,
+          useErrorDialogs: useErrorDialogs,
+          stickyAuth: stickyAuth,
         ),
       );
 
       return BiometricAuthResult(
         success: success,
-        biometricKind: config.biometricKind,
+        biometricKind: effectiveKind,
       );
     } on PlatformException catch (e) {
-      throw BiometricException('Platform error while authenticating', cause: e);
+      throw BiometricException(
+        'Platform error while authenticating',
+        cause: e,
+      );
     } catch (e) {
-      throw BiometricException('Unknown error while authenticating', cause: e);
+      throw BiometricException(
+        'Unknown error while authenticating',
+        cause: e,
+      );
     }
   }
 }

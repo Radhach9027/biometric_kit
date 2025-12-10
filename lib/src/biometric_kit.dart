@@ -41,13 +41,11 @@ class BiometricKit {
     BiometricKind kind = BiometricKind.any,
     bool useErrorDialogs = true,
     bool stickyAuth = false,
-  }) {
-    final config = BiometricPromptConfig(
-      reason: reason,
-      biometricKind: kind,
-      useErrorDialogs: useErrorDialogs,
-      stickyAuth: stickyAuth,
-    );
-    return _provider.authenticate(config);
-  }
+  }) =>
+      _provider.authenticate(
+        reason: reason,
+        kind: kind,
+        useErrorDialogs: useErrorDialogs,
+        stickyAuth: stickyAuth,
+      );
 }
