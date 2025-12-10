@@ -3,7 +3,6 @@ import 'exceptions.dart';
 import 'biometric_kit.dart';
 import 'biometric_preference_store.dart';
 
-/// Opinionated helper for login-like flows.
 class BiometricLoginManager {
   BiometricLoginManager({
     required this.userId,

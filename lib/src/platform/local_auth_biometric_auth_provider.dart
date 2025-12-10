@@ -25,7 +25,7 @@ class LocalAuthBiometricAuthProvider extends BiometricAuthProvider {
       }
 
       return BiometricSupportStatus.supported;
-    } on PlatformException catch (e) {
+    } on PlatformException {
       // Optionally inspect e.code for finer mapping
       return BiometricSupportStatus.unknown;
     }

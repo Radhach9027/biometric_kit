@@ -1,4 +1,3 @@
-/// Abstract so you can plug any secure storage (Keychain, Keystore, etc.)
 abstract class BiometricPreferenceStore {
   const BiometricPreferenceStore();
 

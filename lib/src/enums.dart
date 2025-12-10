@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 
 /// High-level kind of biometric you want to require.
-@immutable
 enum BiometricKind {
   /// Any biometric the OS considers strong enough.
   any,
@@ -14,7 +12,6 @@ enum BiometricKind {
 }
 
 /// Status of biometric support on this device.
-@immutable
 enum BiometricSupportStatus {
   supported,
   noHardware,
