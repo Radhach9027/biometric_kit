@@ -4,31 +4,31 @@
 that provides **secure biometric authentication** using **Face ID /
 Touch ID / Fingerprint** across **iOS and Android**.
 
-It is designed to be: - ✅ Loosely coupled\
-- ✅ Privacy-first & secure\
-- ✅ Industry-standard UX flow\
-- ✅ Plug & play\
-- ✅ Scalable\
+It is designed to be: - ✅ Loosely coupled
+- ✅ Privacy-first & secure
+- ✅ Industry-standard UX flow
+- ✅ Plug & play
+- ✅ Scalable
 - ✅ Clean Architecture friendly
 
 ------------------------------------------------------------------------
 
 ## ✅ What Problems This Solves
 
--   Enable Face ID / Fingerprint only after successful login\
--   Store per-user biometric preference securely\
--   Perform quick biometric login on next app launch\
--   Handle device support, permission errors, and fallback login\
+-   Enable Face ID / Fingerprint only after successful login
+-   Store per-user biometric preference securely
+-   Perform quick biometric login on next app launch
+-   Handle device support, permission errors, and fallback login
 -   Work seamlessly across iOS & Android
 
 ------------------------------------------------------------------------
 
 ## 🚀 Typical Industry Flow
 
-1.  User logs in via Password / OTP\
-2.  App asks: "Enable Face ID?"\
-3.  User accepts → biometric enabled\
-4.  Next launch → auto biometric login\
+1.  User logs in via Password / OTP
+2.  App asks: "Enable Face ID?"
+3.  User accepts → biometric enabled
+4.  Next launch → auto biometric login
 5.  If fails → fallback to normal login
 
 ------------------------------------------------------------------------
